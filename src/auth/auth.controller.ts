@@ -1,13 +1,15 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { type User } from 'src/users/types/users.types';
-import { AuthGuard } from '@nestjs/passport';
-import { type Request } from 'express';
+import { type Response, type Request } from 'express';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { LocalAuthGuard } from './guard/local-guard.guard';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { RoleGuard } from './guard/role.guard';
+import { UserRole } from '@prisma/client';
+import { Role } from './decorators/role.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -26,11 +28,17 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('test-auth')
-  testAuth(@Req() request: Request, @CurrentUser() user: User) {
-    return { user, test: request?.user }
+  testAuth(@Req() request: Request, @CurrentUser() user: User, @Res() response: Response) {
+    response.cookie('token', request?.headers.authorization?.split(' ')[1])
+    return response.json({
+      request: request?.user,
+      user,
+      agent: request?.headers['user-agent']
+    })
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Role(UserRole.admin)
   @Post('test-jwt')
   testJwt(@Req() request: Request, @CurrentUser() user: User) {
     return { user, test: request?.user }

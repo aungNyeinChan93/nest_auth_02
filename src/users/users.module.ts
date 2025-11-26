@@ -14,7 +14,6 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: ".env"
     }),
     PrismaModule,
-
   ],
   exports: [
     UsersService

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable prettier/prettier */
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -30,6 +32,7 @@ export class AuthController {
   @Post('test-auth')
   testAuth(@Req() request: Request, @CurrentUser() user: User, @Res() response: Response) {
     response.cookie('token', request?.headers.authorization?.split(' ')[1])
+    response.cookie('token_2', request?.headers.authorization?.split(' ')[2])
     return response.json({
       request: request?.user,
       user,
